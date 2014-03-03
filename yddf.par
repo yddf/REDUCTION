@@ -1,0 +1,60 @@
+{redpar,                       ; named structure, passed by reference
+rootdir: '/',             ; root directory. All other paths are relative to rootdir
+logdir:  'tous/yddf/logsheets/',         ; log sheets 
+logstdir:  'tous/yddf/logstructs/',         ; log sheets 
+iodspecdir: 'tous/yddf/iodspec/',        ; reduced spectra in RDSK/WRDSK format
+plotsdir: '/home/matt/Sites/chi/red/plots/', ; directory to put encapsulated postscript and PNG plots
+fitsdir:    'tous/yddf/fitspec/',        ; reduced spectra in FITS format
+thiddir:    'tous/yddf/thid/wavfile/',   ; wav saved in in *.dat files, not used
+thidfiledir: 'tous/yddf/thid/thidfile/', ; thid saved in *.thid files
+rawdir: 'raw/yddf/',                ; raw files
+imdir:   'yymmdd/',            ; yymmdd/ image directory with raw night data (*)
+date:   'yymmdd',            ; yymmdd/ image directory with raw night data (*)
+seqnum:   'flat',            ; the image sequence number (*)
+versiond:   'date',            ; systime when this file was created (*)
+versionn:   '3.0',            ; version of the reduction code
+prefix_tag: 'r',               ; for output filenames 
+prefix:  'yddfyymmdd.',         ; file prefix (*)
+flatdir:  'tous/yddf/flats/',            ; summed flat fields
+biasdir:  'tous/yddf/medbias/',            ; median bias frames
+biasmode: 1,            ; 0: use median bias frame, 1: use median overscan row
+orderdir: 'tous/yddf/orders/',           ; order locations
+barydir:  'tous/CHIRON/bary/',             ; code for barycentric correction? 
+xtrim: [0,3150],             ; trim along line (cross-dispersion direction), UNBINNED pixels
+ytrim: [601,3800],             ; vertical trim (along disp.), UNBINNED pixels yt=2
+readmodes:  ['fast','normal'], ; readout modes
+nlc: [[0, 0],[0, 0]], ;non-linearity coefs. [left,right] in fast and normal
+gains: [[5.00,5.17,4.73,5.40], [1.309,1.283,1.266,1.259]], ; gain  [ [4*]fast, [4*]norm], el/ADU  corrected
+ron:   7.,                     ; RON estimate [ADU], to be calculated from bias (*)
+gain:   1.,                    ; actual gain [el/adu] (*)
+binning: [1,1],                ; will contain actual binning [row,col] from the header (*)
+mode:  0,                      ; index of the actual mode (*)
+;FLATNORM OPTIONS:
+; OLD 0. no normalization. Flatfield with median flat AFTER image extraction
+;0. no normalization. Flatfield with weighted mean flat AFTER image extraction
+;1. normalize the flats before finding the median flat. flat AFTER image extraction
+;2. normalize BEFORE image extraction. No normalization. Flat field with a running median flat.
+;3, use rayclean to coadd the extracted quartz spectra.
+flatnorm:  1,                      
+minflatval: 1d3,       ; minimum acceptable value for flats 
+slicerflat:  1,                      ; set this to 1 to use the narrow slit + shift & width change for order finding
+pkcoefs: [26.4117,34.9785,0.114412,0.00182212],  ;yt=2 poly coefs of peak maxima @center y(iord), unbinned pixels
+pkcoefs1: [26.4517d,35.0451d,0.112029d,0.00188384d], ;use this for data between 120302 - 120501 (torrent logic problem)
+nords:  62,                    ; number of orders to extract
+modes: ['narrow','slicer','slit','fiber','narrow'],  ; observing modes 
+;xwids: [6,12,6,5],             ; extraction width, binned pixels 
+xwids: [8,12,8,5,18],             ; extraction width, binned pixels 
+slcrxtrawid: [2,26],  ;set the 0th element >0 to give an extra width to slicer orders of slcrxtrawid[0] 
+					 ;to the 1st slcrxtrawid[1] rows. This is a hack for lack of cross dispersion 
+dpks:  [0,-5,0,0,0],             ; peak shift for each mode, binned pixels 
+binnings: ['3x1','3x1','3x1','4x4', '1x1'], ; binning in each mode, row x column
+debug: 4}                      ; 1 in debug mode, with plots and stops
+
+;(*): denotes this value is set in sorting_hat by the options when calling it
+;DEBUG MODES1
+;0. No stops. Prints as little as possible. No plots.
+;1. No stops. Prints a little more. Poscript and PNG Plots for quality control.
+;2. Stops in debugging locations. PS and PNG plots. Prints a lot. 
+;3. Stops in debugging locations. Plots to screen. Prints a lot. 
+;4. Everything. Run this when CHIRON has been modified to determine new order locations. 
+;	 Once finished, copy the new best fit order locations to the "pkcoefs" tag above.
