@@ -1,0 +1,34 @@
+{redpar,                       ; named structure, passed by reference
+rootdir: '/',             ; root directory. All other paths are relative to rootdir
+logdir:  'tous/mir7/logsheets/',         ; log sheets 
+iodspecdir: 'tous/mir7/iodspec/',        ; reduced spectra in RDSK/WRDSK format
+;iodspecdir: 'new_iodspec/',        ; reduced spectra in RDSK/WRDSK format
+fitsdir:    'tous/mir7/fitspec/',        ; reduced spectra in FITS format
+;fitsdir:    'new_fitspec/',        ; reduced spectra in FITS format
+thiddir:    'tous/mir7/thid/wavfile/',   ; wav saved in in *.dat files, not used
+thidfiledir: 'tous/mir7/thid/thidfile/', ; thid saved in *.thid files
+rawdir: 'raw/mir7/',                ; raw files
+imdir:   '111102/',            ; yymmdd/ image directory with raw night data (*)
+prefix_tag: 'a',               ; for output filenames 
+prefix:  'chi111102.',         ; file prefix, will be set by sorting_hat   (*)
+flatdir:  'tous/mir7/flats/',            ; summed flat fields
+orderdir: 'tous/mir7/orders/',           ; order locations
+barydir:  'tous/mir7/bary/',             ; code for barycentric correction? 
+xtrim: [723,3150],             ; trim along line (cross-dispersion direction), UNBINNED pixels
+;xtrim: [753,3150],             ; trim along line (cross-dispersion direction), UNBINNED pixels
+;ytrim: [301,3500],             ; vertical trim (along disp.), UNBINNED pixels
+ytrim: [611,3810],             ; vertical trim (along disp.), UNBINNED pixels 4111 - [301,3500]
+readmodes:  ['fast','normal'], ; readout modes
+nlc: [[5.0e-6, 4.3e-6],[4.5e-6, 4.0e-6]], ;non-linearity coefs. [left,right] in fast and normal
+gains: [[2.59,2.19], [2.23, 1.92]], ; gain  [ [l,r]fast, [l,r]norm], el/ADU  
+ron:   2.,                     ; RON estimate [ADU], to be calculated from bias (*)
+gain:   1.,                    ; actual gain [el/adu] (*)
+binning: [1,1],                ; will contain actual binning [row,col] from the header (*)
+mode:  0,                      ; index of the actual mode (*)
+pkcoefs: [38.0,43.890,0.2310,0.002029],  ; poly coefs of peak maxima @center y(iord), unbinned pixels
+nords:  40,                    ; number of orders to extract
+modes: ['narrow','slicer','slit','fiber'],  ; observing modes 
+xwids: [6,12,6,5],             ; extraction width, binned pixels 
+dpks:  [10,7,10,9],             ; peak shift for each mode, binned pixels 
+binnings: ['3x1','3x1','3x1','4x4'], ; binning in each mode, row x column
+debug: 0}                      ; 1 in debug mode, with plots and stops

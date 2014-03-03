@@ -1,0 +1,28 @@
+{redpar,                       ; named structure, passed by reference
+rootdir: '/mir7/',             ; root directory. All other paths are relative to rootdir
+logdir:  'logsheets/',         ; log sheets 
+iodspecdir: 'iodspec/',        ; reduced spectra in RDSK/WRDSK format
+fitsdir:    'fitspec/',        ; reduced spectra in FITS format
+thiddir:    'thid/wavfile/',   ; wav saved in in *.dat files
+thidfiledir: 'thid/thidfile/', ; thid saved in *.thid files
+rawdir: 'raw/',                ; raw files
+imdir:   '111003/',            ; yymmdd/ image directory with raw night data
+prefix:  'chi111003.',         ; file prefix
+flatdir:  'flats/',            ; summed flat fields
+orderdir: 'orders/',           ; order locations
+barydir:  'bary/',             ; code for barycentric correction? 
+xtrim: [753,3150],             ; trim along line (cross-dispersion direction), UNBINNED pixels
+;ytrim: [301,3500],             ; vertical trim (along disp.), UNBINNED pixels
+ytrim: [611,3810],             ; vertical trim (along disp.), UNBINNED pixels 4111 - [301,3500]
+readmodes:  ['fast','normal'], ; readout modes
+nlc: [[5.0e-6, 4.3e-6],[4.5e-6, 4.0e-6]], ;non-linearity coefs. [left,right] in fast and normal
+gain: [[2.59,2.19], [2.23, 1.92]], ; gain  [ [l,r]fast, [l,r]norm]  
+binning: [1,1],                ; will contain actual binning [row,col] from the header 
+;pkcoefs: [0.9,41.167,0.3516],  ; poly coefs of peak maxima @center y(iord), unbinned pixels
+pkcoefs: [4.4,41.252,0.353],  ; poly coefs of peak maxima @center y(iord), unbinned pixels
+nords:  42,                    ; number of orders to extract
+modes: ['narrow','slicer','slit','fiber'],  ; observing modes 
+xwids: [6,12,6,6],             ; extraction width, binned pixels 
+dpks:  [0,0,0,0],              ; peak shift for each mode, binned pixels 
+binnings: ['3x1','3x1','3x1','4x4'], ; binning in each mode, row x column
+debug: 0}                      ; 1 in debug mode, with plots and stop

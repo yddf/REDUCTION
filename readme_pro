@@ -1,0 +1,632 @@
+Aug 9, 2011
+---------------
+
+e-mail from M.Giguerre of Jul 19 2011:
+
+
+Debra  mentioned  that  you  wanted   a  copy  of  the  raw  reduction
+package. You can download all of our CHIRON programs at:
+
+exoplanets.astro.yale.edu/chiron_pros.tgz
+
+To avoid IDL  path problems  that might arise,  I'd suggest you install
+all of these files in a directory named:
+
+/mir7/pro/
+
+The  way the raw  reduction, wavelength  calibration and  reduced file
+fits creation occurs every morning is by issuing the command:
+
+IDL>chi_reduce, /allofit, /autothid, date='110719'
+
+Where  "allofit" reduces  the data  for all  4 modes  sequentially and
+"autothid"  determines  what  files  are ThAr  observations  and  uses
+THID.pro to use those files for wavelength calibration.
+
+Proposed sequence:
+
+1. CCDred (bias, gain, non-linearity, number of ampls) ==> image
+   Header keyword translation if necessary.
+
+2. Orders and flat field. Bad pixels? Cosmic rays?
+
+3. Extraction, wavelength calibration. 
+
+pro/sorting_hat_new and chi_reduce_new to test. 
+
+
+Aug 23, 2011
+-------------
+
+Copied from ctimac1 two nights 110814/ and 110820/ in /mir7/raw/.
+logmaker does not work because prefix is qa39_ (must be qa39.)
+rename.sh script is made to replace _ with. 
+
+Oct 4, 2011
+------------
+
+First attempts to work from the home directory prj/chiron/pro/.
+
+imdir = '110820'
+star=[5920,5921]
+thar=[5574]
+flatset = 5488 + indgen(5)
+
+reduce_ctio4k, imdir=imdir, imprefix='qa39', star=star, flatset=flatset, bstar_ind = flatset[0], thar=thar, xwid=0, dpks=0
+
+Corrections to make it work in 4x4, dirty for now:
+
+- addwf_test2 l56 (trim)
+- ctio_dord l70 (trim)
+- ctio_spec l110, l243 (trim)
+image is 1024x1028
+
+addwf_test2 worked, produced qa39..sum 
+getorc --> fords --> returns without order description. 
+
+stop at l65 in addwf_test2. im[801,600], red wavelength is at the bottom.
+
+Modify findpks: introduce pksearch=7 (was 12).
+The extraction and cosmic rays work, probably poorly. 
+
+rdsk, t, 'rqa39.5574', 1 ; Th-Ar
+   tvscl, congrid(t,801, 42*4)
+
+Oct 5, 2011
+-------------
+
+Fake night for training is 111003
+
+work on thid.pro. 
+See README_runall in pro. Steps:
+
+restore, '/mir7/thid/thidfile/rqa39.5969.thid' ; thid structre, wvc are the coefs
+
+rdsk, t, /mir6/iodspec/rqa39.5969.thid'  ; [801,40]
+thid, t, 88., 88.*[6342.6466], wvc, thid, init=thid.wvc, /orev
+
+stops at l.112 V,X arrays dimension problem. Corrected (wave had 3200 pixels)
+type h to see the options.
+Similar errors at lines 412,379.,572. 
+'m' fails at line 331 (FMTNUM)
+Click outside window to exit from line marking.
+
+uses also:
+thid_func to fit coefficients
+cont_fit   fit continuum
+mkwave.pro creates wave{npix,nord), but npix is wrong. 
+thid_data.xdr - restored from current directory, line data
+
+save thid structure: 
+save, thid, fi='/mir7/thid/thidfile/rqa39.5969.thid'
+
+permission denied! saved in the current directory PRO.
+
+Reduce 4x4 flat field:
+star=[5488]
+
+reduce_ctio4k, imdir=imdir, imprefix='qa39', star=star, flatset=flatset, bstar_ind = flatset[0], thar=thar, xwid=0, dpks=0
+
+rdsk, a, '/mir7/iodspec/rqa39.5488', 1 ; flat
+   tvscl, congrid(a,801, 42*8)
+
+a1 = a
+for i=0,39 do a1[*,i] = a[*,8]/median(a[*,i]) 
+order 39 is zero, 37,38 are bad!
+
+****** Start code rework **************
+ctio.par - first version. redpar = readpar('ctio.par')
+Create getimage.pro: reading the CCD. 
+
+Oct 6, 2011
+------------
+
+Testing getimage.pro: it works!
+im = getimage('/mir7/raw/111003/chi111003.0018.fits', redpar)
+im = getimage('/mir7/raw/110820/qa39.5920.fits', redpar)
+
+imdir = '111003'
+star=[2201,2202,2203]
+thar=[2405]
+flatset = 2438 + indgen(10)
+
+reduce_ctio4k, imdir=imdir, imprefix='chi111003', star=star, flatset=flatset, bstar_ind = flatset[0], thar=thar, xwid=0, dpks=0
+
+; reduce_ctio4k, imdir=imdir, imprefix='chi111003', bstar_ind = flatset[0],  thar=thar, xwid=0, dpks=0
+
+addwf_test2: works with getimage. Saves data as prefix..sum in the program directory.
+
+work on ctio_dord: eliminate call to getorc, call directly fords.
+fords is modified, do not use the ctio_common. 
+
+Oct 7, 2011
+------------
+order location with handord.pro
+im = getimage('/mir7/raw/111003/chi111003.2438.fits', redpar)
+im = rotate(im,1)
+Crashes, wait for Nicolai to comment.
+
+Work on fords.pro. Diagnostic added: 1 to see all orders, 2 to plot each swath.
+smbox=3 and poff=4 in fords.pro work for 4x4 (fiber).
+
+Add binning[x,y] and pkcoefs[3] to ctio.par
+change getimage.pro to remember the binning.   
+
+imdir = '111003'
+star=[2201,2202,2203]
+thar=[2405]
+flatset = 2438 + indgen(10) ; 4x4
+flatset = 0033 + indgen(10) ; 3x1 narrow
+
+
+reduce_ctio4k, imdir=imdir, imprefix='chi111003', star=star, flatset=flatset, bstar_ind = flatset[0], thar=thar, xwid=0, dpks=0
+
+to find the coefficients, stop at fords: peak plot
+do svdfit 2nd order polynomial to the central swath peaks, in unbinned y-pixels
+
+peak poly calc:
+y1 = res[0] & for i=1,2 do y1 += res[i]*x^i
+
+Now fit on a 4x4 binning, swath 0, fromdiag. plot 
+x = indgen(nord)
+y = x*0 + 4.*ords[0,*] ; remov extra dimension by adding x*0
+res = svdfit(x,y,3, yfit=yfit)
+
+Oct 12, 2011
+--------------
+work on fords.pro. Start order finding at central swath.
+stop at peak plot to find better initial order location:
+
+x = findgen(nord)
+y = 3*reform(ords(nswa/2,*), nord)
+sel = where(y gt 0)
+res = svdfit(x[sel], y[sel],3)
+y1 = poly(x, res)
+
+Coefs. [1.2, 41.145, 0.3520] for 3x1. Some cubic residuals are 
+present still, initial orders are ~2pix off. 
+But the rest works well in 3x1 and 4x4. 
+
+Now work on extraction:
+ctio_spec.pro  (does not use thar and nosky flags, uses common)
+
+imdir = '111003'
+star=[2201,2202,2203]
+thar=[2405]
+flatset = 2438 + indgen(10) ; 4x4
+
+star = [2438] ; use flat
+
+reduce_ctio4k, imdir=imdir, imprefix='chi111003', star=star, flatset=flatset, bstar_ind = flatset[0],  xwid=0, dpks=0
+
+in ctio_spec.pro: 
+quartz 2D summed frame is meaidned with 5x window along each line, then divided by the smoothed line.
+ 
+j - number of line. j=60.
+plot, im[*,j]/max(im[*,j]), yr=[0,1.5]
+oplot, flt[*,j],li=1
+;oplot, smflt[*,j]/max(smflt[*,j]), psym=1
+
+==> flatfield.ps shows the problem. 5-point median on steep slope equals mid-point, 
+    hence no FF correction is done on the slopes.
+
+Change ctio_spec to divide by the extracted flat field.
+Change getimage to use the gain. Inserted gain in the redpar.
+
+plot, spec[*,j] - smooth(spec[*,j], 10), ys=1
+plot, (spec[*,j] - smooth(spec[*,j], 10))/smooth(spec[*,j],10), ys=1
+
+in 4x4 the flat fluctuations are <0.5% at the order center! 
+
+Oct 13, 2011
+-------------
+
+Organization: xwid, orders, _new.pro etc.
+xwid is passed to ctio_spec as keyword. If not given, use getxwd.pro.
+
+reduce_ctio4k, imdir=imdir, imprefix='chi111003', star=star, flatset=flatset, bstar_ind = flatset[0],  xwid=6, dpks=0
+
+; 3x1 test
+imdir = '111003'
+star=[34]
+thar=[13]
+flatset = 034 + indgen(10) ; 3x1
+
+orders20-22.ps: plot of 3 orders in extracted FF 0034. 
+Features: wide ~5% depressions, sharp dips.
+
+
+
+Now address sorting_hat.pro (new version).
+
+sorting_hat, '111003', run='chi111003', mode='fiber', /reduce
+
+crushes line 99: no .dat file in the thid_path directory. 
+line 177: flatset undefined. the problem was modeidx[] being an array.
+
+sorting_hat works for fiber and slit! Need to check for the slicer...
+
+sorting_hat, '111003', run='chi111003', mode='fiber', /end_check
+
+Oct 14-15, 2011
+--------------
+
+Documentation on the code in doc/code/chireduce.tex
+Copied relevant programs to pro1/, work there.
+
+reduce_ctio4k, imdir=imdir, imprefix='chi111003', star=star, flatset=flatset, bstar_ind = flatset[0], thar=thar, xwid=6, dpks=0
+
+Changed FF algorithm to poly fit each order above threshold (10%).
+Corrected error in adflat (was not summing!)
+
+/mir7/flats/     summed flat fields
+/mir7/orders/    order coefficients
+
+New script reduce_ctio.pro to take redpar and mode.
+star=[34] ; narrow
+thar=[13]
+flatset = 034 + indgen(10) ; 3x1
+
+star=[2201,2202,2203] ; fiber
+thar=[2405]
+flatset = 2438 + indgen(10)
+
+reduce_ctio, redpar, 'fiber', flatset=flatset,  star=star
+
+changed addflat and ctio_dord to return results.
+Writng to disk is done by reduce_ctio. 
+
+Removing extra path in front:
+s = !path
+!path = strmid(!path,strpos(s,':/Applications')+1)
+
+sorting_hat, '111003', mode='fiber', /reduce
+sorting_hat, '111003', mode='fiber', /end_check
+
+Oct 17, 2011
+--------------
+
+work on thid.pro. 
+line 127: added re-formatting if pixels do not match
+
+restore, '/mir7/thid/thidfile/rqa39.9407.thid' ; thid structre, wvc are the coefs
+
+rdsk, t, '/mir6/iodspec/rqa39.9407', 1  ; [3200,41]
+thid, t, 88., 88.*[6342.,6466], wvc, thid, init=thid.wvc, /orev
+
+restore, '/mir7/thid/thidfile/rchi111002.0013.thid' ; thid structre, wvc are the coefs
+
+rdsk, t, '/mir7/iodspec/rchi111003.0013', 1   ; slit
+
+Compare fictitious night Oct 3 with Oct2 (same data).
+New spectra in 3x1 (slit) are shifted left by 310pix!!! 
+And they are less in intensity by 3.0 times, exactly: divided by binning?
+
+The shift is explained by clipping *after* imave rotation
+in the original ctio_*** 
+New ytrim = 4112 - [301,3500].
+This needs new peaks!
+
+Modify reduce_ctio to use old flats
+flatset = 034 + indgen(10) ; 3x1
+
+flatset = 034 + indgen(10) ; 3x1
+reduce_ctio, redpar, 'slit', thar=[13], star=[1201], flatset=flatset
+New X-trim is [611,3810]. Now there is no shift.
+
+sorting_hat, '111003', run='chi111003', mode='fiber', /reduce
+rdsk, t1, '/mir7/iodspec/rchi111003.0015', 1   ; fiber
+thid: sigma=0.23pix
+
+Now work on sorting_hat to do thids and save them
+
+Reduce all slit. 
+
+sorting_hat, '111003', mode='slit', /getthid, thar_soln='rqa39.9407'
+sorting_hat, '111003', mode='slit', /getthid, thar_soln='rchi111002.0013'
+
+auto_thid works!
+
+sorting_hat, '110820', mode='fiber', /red, run='qa39.'
+
+Put explicit run for old format. The flats are overrun!
+
+thid/thidfile/ has r* prefix! we do not add it here. Corrected.
+findthid, '111003', redpar, thidfile, run=run, mode=mode
+
+sorting_hat: /iod2fits now works. Finds closest in time wave file
+for writing to FITS. Time interpolation is easy!
+
+Oct 18, 2011
+--------------
+
+allreduce.pro: top script to call sorting_hat for all modes.
+For each mode, sorting_hat does reduce, getthid, iod2fits
+
+Test slicer mode, debug=1:
+flatset = 63 + indgen(10) ; 3x1
+reduce_ctio, redpar, 'slicer', thar=[14,2401], star=[63], flatset=flatset
+
+rdsk, s, '/mir7/iodspec/rchi111003.0063', 1
+
+reduce_ctio, redpar, 'slicer', star=[63]
+
+fords is changed. 3rd order poly os needed to describe default orders.
+All works well for slicer, rms 0.06pix.
+
+Optimum extraction is present in getspec.
+Checked onimage 0048 that the counts in boxcar and optimum are very close.
+Order 10 at center field is in pixels 123:128 and has 3.4E4 counts by direct sum.
+
+Check on faint star:
+reduce_ctio, redpar, 'fiber', star=[63]
+
+stop in getspec, after cosmic-ray removal.
+x = spec[*,10]
+print, sqrt(variance(x - smooth(x,10)))
+
+image 2201, fiber:
+rms after subtracting 10-pix smoothed:
+boxcar 11.71 opt 10.66 average signal 120.3ADU
+photon noise 7.3ADU (gain=2.23)
+
+Image [1301], slit+iodine
+compare_opt.ps plots fraction of order 10. Again the counts are OK. 
+compare_dif.ps: difference plot of the same orders
+
+image[1410]: slicer, iodine
+compare_slicer.ps relative diff. <0.5% in order 10.
+order 23: up to 1%. 
+compare_slicer31.ps order 31 relative difference. 
+
+order j=35: pixel boundaries
+
+x = findgen(3200) & y = poly(x, orc[*,j]) & y1 = y mod 1
+plot, (spec[*,j] - optspec[*,j])/spec[*,j], xs=1, xr=[1500,2000]
+oplot, x, (y1-1)/100, li=2
+
+==> pixel-wave.ps
+allreduce works, but gets 39 orders with slicer!
+
+Oct 19, 2011
+-------------
+
+compare_1401.ps: old reductions (line) and new (crosses, x3) in order 10. Slit iodine. 
+Fixing slicer mode (why only 39 orders?).
+Enlarge image cut to the left by 30 unbinned pixels, correct by adding 10 to dords.
+
+reduce_ctio, redpar, 'slicer', star=[63]
+OK, it works. Corrected for the lack of w-inversion in sorting_hat. 
+Matt does not write w in .dat files!
+
+The problem was that keyword=0 means no keyword!
+Now pass mode in redpar. 
+discard order=0 in fords "by hand", otherwise fiber finds it and it's a mess. 
+
+slicer_swath.ps and slicer_cut.ps illustrate the slicer. 
+
+doc/code/chireduce.tex is the updated description.
+
+Oct 20, 2011
+-------------
+
+Reduce all fiber spectra.
+August: 2, 3x,4,6x,8,9,10(N=16),12,14,18,20(N=9),22,24(N=9),28,30
+Sep:    2(N=15),4,6(N=9),8,10(N=8),12,14,18,19,20,22,24,26,28,30
+Oct:    2,4,6,8,10,12,13,14,18 
+
+xex.pro: data examination GUI
+
+
+Oct 21, 2011
+--------------
+
+Re-reduce Oct 3. Needs /new in wdsk!!!
+Changed sorting_hat: no writing or using .dat.
+
+flat_narrow_slit_10.ps FF comparison in order 10.
+In oder 20 and higher the polynomial wings produce strong correlation. 
+noise.pro to calc. rms relative and chi2, central 1/3 of order
+
+
+Test extraction noise on data of October 3
+
+             order 10          order 30
+Mode   File mean rms%  chi2     mean  rms%  chi2
+----------------------------------------------
+narrow  18  2500 1.45  1.40    5490  1.00   1.48
+slit    33  2600 1.41  1.34    5760  0.99   1.46
+slicer  63  5850 0.96  1.41   13000  0.70   1.63  
+fiber   48 13400 0.71  1.76   29500  0.52   2.05  
+
+reduce Sep 24 slicer, fiber into new directories
+reduce 111008  as well.
+
+Aug 02 takes too long because of Alp Cen observe with sllicer.
+Launch batch slicer reduction using logs in xexcomm :
+for i=0,39 do allreduce, logs[i]
+
+stops if no data. 
+
+Oct 22, 2011
+------------
+
+Sample of bright star, slicer: U Oph 110904 sp. 9398
+UPoh_2D.ps
+UOph_ord29.ps
+UOph_ord29_power.ps
+
+Oct 24, 2011
+-------------
+Sep 20: not reduced, wrong prefix. Reduced.
+
+Plots of chi111008.1266. V=4.25. G8V, 600s, signal 7E4 in order 21.
+HD20794_111008_2D.ps
+HD20794_111008_spec.ps
+
+
+Plots on J0535-0447 = Parenago 2017.
+
+from top to bottom:
+legend, ['11-09-12 10:14', '11-09-12 10:02', '11-09-20 07:59'], /top, /right 
+
+Thursday party:
+matthew.giguere@yale.edu
+mail.chris.schwab@googlemail.com
+julspronck@gmail.com
+john.brewer@yale.edu
+
+Change FF to save 3 planes;
+
+imdir = '111003'
+star=[34]
+thar=[13]
+flatset = 034 + indgen(10) ; 3x1
+redpar = readpar('ctio.par')
+
+reduce_ctio, redpar, 'slit',   star=star
+
+Oct 26, 2011
+-------------
+
+Test reduction code with truncated IDL path.
+
+s = !path
+!path = strmid(!path,strpos(s,':/Applications')+1)
+
+work on getinage (to calc. RON), getspec, mkslitf, remove_cosmics, optordv 
+to pass gain and RON without common block.
+
+reduce_ctio, redpar, 'slit', flatset=flatset,  star=star
+eliminated calls to strt(().
+sorting_hat checked.
+
+auto_thid.pro checked, less verbose.
+All programs copied to pro2/ 
+
+ordshift.pro to check order shift
+
+Oct 27, 2011
+-------------
+
+Update chireduce.tex. Re-calc. extraction noise. 
+Test extraction noise on data of October 3 (see in chireduce.tex)
+
+The extracted spectrum appears more noisy then expected.
+bias image rms is [left/right] 2.95/2.80 (image 0092, fast) 
+and 2.50/2.08 (image 0093, normal). Why ron=11 is needed to reach chi2=1?
+
+Investigate quartz exposure #0049 (Oct 3 always). 
+stop in ctio_spec. Call as
+reduce_ctio, redpar, 'fiber',   star=[0049]
+
+chi2(HF), extraction with cosmics. ron=3, xwid=5, gain=2.3 
+Extraction without cosmics and sky gives similar results.
+
+order    signal    chi2(box)   chi2(opt)    Note 
+------------------------------------------------
+0        3000       1.09        1.17     after FF division   
+10      33000       1.39        1.28     FF  
+30      12000       1.22        1.32     FF
+
+0        3000       0.92        1.02     without FF
+10      33000       1.32        1.22     without FF   
+
+Error in noise.pro is corrected (it was ron^2/gain). 
+Re-do the quartz analysis. 
+
+Display color image: graphics = image(data)
+
+m = 18
+nx = 1600 & ny = 40*m
+
+s = fltarr(nx,ny)
+for i=0,39 do for j=0,m-2 do  s[*,i*m+j] = congrid(sp[1,*,i],1,nx,1) 
+
+;s = reform(congrid(sp[1,*,*],1,nx, ny))
+
+data = fltarr(3,nx,ny)
+
+n1 = 40
+y = findgen(n1)/(n1-1)
+blue = (1. - 2*y) > 0
+red = (2*y -1) > 0
+green = 1. - (red + blue)
+
+red = red*3 < 1
+
+data[0,*,*] = s * (rebin(red,ny, /sample) ## replicate(1, nx))
+data[1,*,*] = s * (rebin(green,ny, /sample) ## replicate(1, nx))
+data[2,*,*] = s * (rebin(blue,ny, /sample) ## replicate(1, nx))
+
+graphics = image(data, dim=[nx,ny])
+
+Study EM fluxes. Best data August 22 (slicer, no iodine)
+
+Vmag  EMNETINT   HD       File
+7.0   14.75      164249   6562
+4.78  136.9      172555   6570
+5.03  40259.     181296   6573
+3.95  228.92     181869   6575
+5.79  53.0       183324   6576
+
+v = [7.0, 4.78, 3.95,  5.79]  
+flux = [14.75, 136.9, 228.92, 53.0]  
+lf = alog10(flux)
+xx = [3,7.5]
+plot, v, lf, psym=1, xtit='Vmag', ytitle='log10(Flux per 0.1s)', xr=xx
+oplot, xx, -0.4*xx + 4 
+==> EMflux.ps
+
+V=5 gives 1kHz count. 
+Expected: optical efficiency 0.00156, QE=0.2, surface 1.2m2, 80nm
+==> 3.0E6 Hz count from 0-mag star.
+  Observed 1E5. deficiency is 30x. 
+
+Oct 28, 2011
+-----------
+
+Reduce echelle spectra.
+ech.par and old software in /mir7/pro.backup
+100804/qa17.* 
+
+All development in pro3/
+reduce_ctio2: top-level script.
+getimage changed to primitive form.
+logmaker changed slightly.
+
+flat= 9202 + indgen(10)
+thar = [9200,9201]
+star = [9225,9226]
+reduce_ctio2, redpar, flat=flat, thar=thar, star=star
+
+addflat works.
+Debug fndpks.pro
+New algorithm: peak is where 1st derivative changes sign and
+swath is greater than smoothed swath. It works beautifully!
+fords, /find key is added
+
+getflat: use med-smoothed flat because of the unusual blase function.
+Set extraction width to 6 pixels.
+
+restore, '/mir7/thid/thid_file/rqa12.1800.thid'
+rdsk, t, '/mir7/new_iodspec/rqa17.9200', 1
+rdsk, sp1, '/mir7/iodspec/rqa17.8001', 1
+
+use rqa17.8001. 29 orders, reversed (red on top). Upper order =88.
+
+thid, t, 88, 88.*[6342,6466], wvc, thid, init=thid.wvc, /orev 
+repeat several times.
+
+rdsk, t, '/mir7/iodspec/rqa17.8001', 1
+
+Old thids contain 29 orders only. to match,
+t = t[*,1:29]
+t = rotate(t,7)
+thid, t2, 88, 88.*[6319.6,6471.3], wvc, thid1, init=thid1.wvc,  /orev
+thid1 saved in thid1.idl.
+326 good lines, rms = 0.31pix. FWHM 1.94pix, resol. 42400. 
+
+
+
+-------------------------------

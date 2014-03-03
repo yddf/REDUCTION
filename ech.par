@@ -1,0 +1,31 @@
+{redpar,                       ; named structure, passed by reference
+rootdir: '/mir7/',             ; root directory. All other paths are relative to rootdir
+logdir:  'logsheets/',         ; log sheets 
+;iodspecdir: 'iodspec/',        ; reduced spectra in RDSK/WRDSK format
+iodspecdir: 'new_iodspec/',        ; reduced spectra in RDSK/WRDSK format
+;fitsdir:    'fitspec/',        ; reduced spectra in FITS format
+fitsdir:    'new_fitspec/',        ; reduced spectra in FITS format
+thiddir:    'thid/wavfile/',   ; wav saved in in *.dat files, not used
+thidfiledir: 'thid/thidfile/', ; thid saved in *.thid files
+rawdir: 'raw/',                ; raw files
+imdir:   '100804/',            ; yymmdd/ image directory with raw night data (*)
+prefix:  'qa17.',         ; file prefix, will be set by sorting_hat   (*)
+flatdir:  'flats/',            ; summed flat fields
+orderdir: 'orders/',           ; order locations
+barydir:  'bary/',             ; code for barycentric correction? 
+xtrim: [0,0],             ; trim along line (cross-dispersion direction), UNBINNED pixels
+ytrim: [0,0],             ; vertical trim (along disp.), UNBINNED pixels 4111 - [301,3500]
+readmodes:  ['normal'], ; readout modes
+nlc: 0, ; non-linearity, not used 
+gains: [[1.3], 1.3]], ; gain  [ [l,r]fast, [l,r]norm], el/ADU  
+ron:   2.,                     ; RON estimate [ADU], to be calculated from bias (*)
+gain:   1.,                    ; actual gain [el/adu] (*)
+binning: [1,1],                ; will contain actual binning [row,col] from the header (*)
+mode:  0,                      ; index of the actual mode (*)
+pkcoefs: [38.0,43.890,0.2310,0.002029],  ; poly coefs of peak maxima @center y(iord), unbinned pixels
+nords:  40,                    ; number of orders to extract
+modes: ['fiber'],  ; observing modes 
+xwids: [6,12,6,5],             ; extraction width, binned pixels 
+dpks:  [10,7,10,9],             ; peak shift for each mode, binned pixels 
+binnings: ['1x1'], ; binning in each mode, row x column
+debug: 1}                      ; 1 in debug mode, with plots and stops
