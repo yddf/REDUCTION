@@ -60,51 +60,6 @@ pretag = redpar.prefix_tag
 
 readcol,logsheet, skip=9, obnm, objnm, i2, mdpt, exptm, bin, slit, f='(a5, a13, a4, a14, a8, a3, a6)'
 
-;now to expand the quartz items in the logsheet:
-print, 'obnm before is: ', obnm
-qcombs = where(strlen(obnm) gt 4)
-for qi=0, n_elements(qcombs)-1 do begin
-qinit = strmid(obnm[qcombs[qi]], 0,4)
-qfini = strmid(obnm[qcombs[qi]], 5,4)
-ncombs = long(qfini) - long(qinit) + 1
-nobnm = lindgen(ncombs) + long(qinit)
-nobjnm = strarr(ncombs)+objnm[qcombs[qi]]
-ni2 = strarr(ncombs)+i2[qcombs[qi]]
-nmdpt = strarr(ncombs)+mdpt[qcombs[qi]]
-nexptm = strarr(ncombs)+exptm[qcombs[qi]]
-nbin = strarr(ncombs)+bin[qcombs[qi]]
-nslit = strarr(ncombs)+slit[qcombs[qi]]
-
-if qcombs[qi] eq 0 then begin
-obnm = [strt(nobnm, f='(I04)'), obnm[(qcombs[qi]+1):*]]
-objnm = [nobjnm, objnm[(qcombs[qi]+1):*]]
-i2 = [ni2, i2[(qcombs[qi]+1):*]]
-mdpt = [nmdpt, mdpt[(qcombs[qi]+1):*]]
-exptm = [nexptm, exptm[(qcombs[qi]+1):*]]
-bin = [nbin, bin[(qcombs[qi]+1):*]]
-slit = [nslit, slit[(qcombs[qi]+1):*]]
-endif
-if qcombs[qi] ne n_elements(obnm)-1 and qcombs[qi] ne 0 then begin
-obnm = [obnm[0:(qcombs[qi]-1)], strt(nobnm, f='(I04)'), obnm[(qcombs[qi]+1):*]]
-objnm = [objnm[0:(qcombs[qi]-1)], nobjnm, objnm[(qcombs[qi]+1):*]]
-i2 = [i2[0:(qcombs[qi]-1)], ni2, i2[(qcombs[qi]+1):*]]
-mdpt = [mdpt[0:(qcombs[qi]-1)], nmdpt, mdpt[(qcombs[qi]+1):*]]
-exptm = [exptm[0:(qcombs[qi]-1)], nexptm, exptm[(qcombs[qi]+1):*]]
-bin = [bin[0:(qcombs[qi]-1)], nbin, bin[(qcombs[qi]+1):*]]
-slit = [slit[0:(qcombs[qi]-1)], nslit, slit[(qcombs[qi]+1):*]]
-endif
-if qcombs[qi] eq n_elements(obnm)-1 then begin
-obnm = [obnm[0:(qcombs[qi]-1)], strt(nobnm, f='(I04)')]
-objnm = [objnm[0:(qcombs[qi]-1)], nobjnm]
-i2 = [i2[0:(qcombs[qi]-1)], ni2]
-mdpt = [mdpt[0:(qcombs[qi]-1)], nmdpt]
-exptm = [exptm[0:(qcombs[qi]-1)], nexptm]
-bin = [bin[0:(qcombs[qi]-1)], nbin]
-slit = [slit[0:(qcombs[qi]-1)], nslit]
-endif
-
-qcombs[qi:*] += (ncombs - 1)
-endfor
 print, 'obnm after is: ', obnm
 ut = gettime(mdpt) ; floating-point hours, >24h in the morning
 ;stop
