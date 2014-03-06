@@ -1,50 +1,51 @@
-pro CTIO_spec,prefix,spfname,outfname,redpar, orc, xwid=xwid, flat=flat, nosky=nosky, cosmics=cosmics
-;Reads in image,  divides by FLAT FIELD.
-;  Extracts spectrum and background from each order, subtracts background,
+;+
 ;
-;INPUT:
-;    PREFIX (input string)   prefix of all file names (i.e., 'qa11.' for qa11.nnnn.fits)
-;        to all observations made with a particular spectrograph setting. 
-;        The following files are expected to exist:
-;	 * prefix.sum - Summed flat field (from addwf.pro)
-;	 * prefix.ord - default order location coefficients (from ctio_dord)
-;    SPFNAME  (input string) filename of given observation.
-;    OUTFNAME (input string) complete path and filename of wdsk-d output.
-;    REDPAR   global parameter structure
-;    ORC order location coefficients
-;    NOSKY (flag) Throw flag to supress sky subtraction.  Use for ThAr
-;        images or to speed things up if sky subtraction (which is
-;        actually a scattered light subtraction) should not be
-;        performed.  Do not combine this flag with cosmics, which
-;        requires a good bg subtraction
-;    COSMICS (flag) Throw this flag to initiate cosmic ray removal.
+;  NAME: 
+;     extract_spec
+;
+;  PURPOSE: Extract the spectrum and divide by flat if specified
+;
+;  CATEGORY:
+;      YDDF
+;
+;  CALLING SEQUENCE:
+;
+;      extract_spec
+;
+;  INPUTS:
+;
+;  KEYWORD PARAMETERS:
 ;    
+;  EXAMPLE:
+;      extract_spec
 ;
-;OUTPUT
-;   The following file may be created by ctio_spec:
-;	  * spfname.ord - order location coefficients, if they were determined
-;         OUTFNAME is the path and filename of the output, reduced spectrum.
-;         OUTFNAME.opt -- optimally extracted spectrum from the cosmic
-;                         ray removal algorithm.
+;  MODIFICATION HISTORY:
+;        c. Matt Giguere 2014.03.05 12:27:23
 ;
-; 12-Oct-201 AT added parameter file as argument, removed common  
+;-
+pro extract_spec, $
+spfname, $
+outfname, $
+redpar, $
+orc, $
+cosmics = cosmics, $
+flat = flat, $
+nosky = nosky
+
+angstrom = '!6!sA!r!u!9 %!6!n'
+loadct, 39, /silent
+usersymbol, 'circle', /fill, size_of_sym = 0.5
 
 DEBUG=redpar.debug
+xwid = redpar.xwids[redpar.mode]
 
-if n_params() lt 5 then begin
-print,'syntax: ctio_spec,prefix,spfname,outfname,redpar,orc[,thar[,nosky]]'
-retall
-endif
-
-print,''
-print,'CTIO_SPEC: Entering routine.'
-
+print,'extract_spec: Entering routine.'
 print,'spfname=',spfname
 
-; Read the image file
-im = getimage(spfname, redpar, header=head)  
+;Read the image file
+im = getimage(spfname, redpar, header=header)  
 if (size(im))[0] lt 2 then begin
-   print, 'Image is not found. Returning from CTIO_SPEC.'
+   print, 'Image is not found. Returning from extract_spec.'
    stop
 endif
 
@@ -56,8 +57,8 @@ ncolf = szf[1]				;# columns in image
 nrowf = szf[2]				;# rows in image
 
 if ncol ne ncolf  then begin
-print, 'CTIO_SPEC: HALT! Your image is not the same size as your flat!'
-stop
+   print, 'extract_spec: HALT! Your image is not the same size as your flat!'
+   stop
 endif
 
 ;OLD SCHOOL WAY OF FLAT FIELDING:
@@ -88,7 +89,7 @@ if redpar.debug ge 2 then stop
 
 ; flat-field correction
 if keyword_set(flat) and redpar.flatnorm le 1 then spec = double(spec)/flat else $
-	print, 'CTIO_SPEC: WARNING: no flat-field correction!'
+	print, 'extract_spec: WARNING: no flat-field correction!'
 i=0
 specsz = size(spec)
 nords = specsz[2]
@@ -124,8 +125,8 @@ for i=0, nords-1 do begin
 endfor
 
 
-print,'CTIO_SPEC: Saving extracted spectrum to ' + outfname
-spec=rotate(spec,2)
+print,'extract_spec: Saving extracted spectrum to ' + outfname
+spec=rotate(spec,7)
+print, header
 mwrfits, spec, outfname, header
-
-end
+end;extract_spec.pro

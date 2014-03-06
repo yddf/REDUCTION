@@ -94,10 +94,12 @@ orcend(*,nord+1) = orchi
 
 ;Now loop through orders extracting spectrum and maybe subtracting background.
 
-if redpar.debug ge 2 then print,'GETSPEC: Extracting spectrum.'
+if redpar.debug ge 2 then begin
+	print,'GETSPEC: Extracting spectrum.'
+	stop
+endif
 
 
-stop
 if n_elements(sky) eq 0 then sky=im*0.
 if keyword_set(cosmics) then remove_cosmics, im, orc, xwd, sky, spec = optspec, cosmics = replace, mask = mask, fwhm = seeing, gain=gain, ron=ron
 
@@ -112,9 +114,6 @@ ytarr = dblarr(imsz[1], orcsz[2])
 for onum=1,nord do begin				;loop thru orders
   ;extract counts/pixel
   if keyword_set(redpar) then begin
-  	;add variable order width:
-     if redpar.slcrxtrawid[0] gt 0 and onum gt redpar.slcrxtrawid[1] and redpar.mode eq 1 then $
-     	xwd = redpar.xwids[redpar.mode] + redpar.slcrxtrawid[0] else xwd = redpar.xwids[redpar.mode]
 	 getarc, im, orcend, onum, xwd, arc, pix, debug = redpar.debug, ybi, yti
 	 for i=0, imsz[1]-1 do maskim[i,ybi[i]:yti[i]] += (255d - 255d / nord * onum)
   endif else getarc, im, orcend, onum, xwd, arc, pix, ybi, yti

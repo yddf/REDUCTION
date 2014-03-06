@@ -3,7 +3,7 @@ rootdir: '/',             ; root directory. All other paths are relative to root
 logdir:  'tous/yddf/logsheets/',         ; log sheets 
 logstdir:  'tous/yddf/logstructs/',         ; log sheets 
 iodspecdir: 'tous/yddf/iodspec/',        ; reduced spectra in RDSK/WRDSK format
-plotsdir: '/home/matt/Sites/chi/red/plots/', ; directory to put encapsulated postscript and PNG plots
+plotsdir: '/Users/matt/Sites/yddf/red/plots/', ; directory to put encapsulated postscript and PNG plots
 fitsdir:    'tous/yddf/fitspec/',        ; reduced spectra in FITS format
 thiddir:    'tous/yddf/thid/wavfile/',   ; wav saved in in *.dat files, not used
 thidfiledir: 'tous/yddf/thid/thidfile/', ; thid saved in *.thid files
@@ -17,7 +17,7 @@ prefix_tag: 'r',               ; for output filenames
 prefix:  'yddfyymmdd.',         ; file prefix (*)
 flatdir:  'tous/yddf/flats/',            ; summed flat fields
 biasdir:  'tous/yddf/medbias/',            ; median bias frames
-biasmode: 1,            ; 0: use median bias frame, 1: use median overscan row
+biasmode: 2,            ; 0: use median bias frame, 1: use median overscan row
 orderdir: 'tous/yddf/orders/',           ; order locations
 barydir:  'tous/CHIRON/bary/',             ; code for barycentric correction? 
 xtrim: [0,3150],             ; trim along line (cross-dispersion direction), UNBINNED pixels
@@ -38,19 +38,16 @@ mode:  0,                      ; index of the actual mode (*)
 flatnorm:  1,                      
 minflatval: 1d3,       ; minimum acceptable value for flats 
 slicerflat:  1,                      ; set this to 1 to use the narrow slit + shift & width change for order finding
-pkcoefs: [26.4117,34.9785,0.114412,0.00182212],  ;yt=2 poly coefs of peak maxima @center y(iord), unbinned pixels
-pkcoefs1: [26.4517d,35.0451d,0.112029d,0.00188384d], ;use this for data between 120302 - 120501 (torrent logic problem)
-nords:  62,                    ; number of orders to extract
-modes: ['narrow','slicer','slit','fiber','narrow'],  ; observing modes 
-;xwids: [6,12,6,5],             ; extraction width, binned pixels 
-xwids: [8,12,8,5,18],             ; extraction width, binned pixels 
-slcrxtrawid: [2,26],  ;set the 0th element >0 to give an extra width to slicer orders of slcrxtrawid[0] 
-					 ;to the 1st slcrxtrawid[1] rows. This is a hack for lack of cross dispersion 
-dpks:  [0,-5,0,0,0],             ; peak shift for each mode, binned pixels 
+pkcoefs: [25.515140,20.117281,0.059089911,0.0011122965],  ;yt=2 poly coefs of peak maxima @center y(iord), unbinned pixels
+nords:  86,                    ; number of orders to extract
+modes: ['fiber'],  ; observing modes 
+xwids: [20],             ; extraction width, binned pixels 
+dpks:  [0],             ; peak shift for each mode, binned pixels 
 binnings: ['3x1','3x1','3x1','4x4', '1x1'], ; binning in each mode, row x column
-debug: 4}                      ; 1 in debug mode, with plots and stops
+swid: 32, ;swath width: # of columns in each swath
+debug: 0}                      ; 1 in debug mode, with plots and stops
 
-;(*): denotes this value is set in sorting_hat by the options when calling it
+;(*): denotes this value is set in yddf_reduce by the options when calling it
 ;DEBUG MODES1
 ;0. No stops. Prints as little as possible. No plots.
 ;1. No stops. Prints a little more. Poscript and PNG Plots for quality control.

@@ -1,4 +1,4 @@
-pro fords,im,swid,orc,ome,redpar, minreq=minreq
+pro fords,im,orc,ome,redpar, minreq=minreq
 ;Maps out and fits polynomials to order positions.  Returns both polynomial
 ;  coefficients and mean difference between polynomial and actual locations.
 ; im (input array (# columns , # rows)) image on which order locations are to
@@ -36,13 +36,15 @@ pro fords,im,swid,orc,ome,redpar, minreq=minreq
 ;              swath with peaks
 ; 18-oct-2011 AT: introduced dpks. Reduced swath smoothing to simple median
 ; 19-Feb-2012 MJG: Added section for fitting for peak coefficients when setting
-;				up for the first time.
+;				up for the first time, input redpar structure
+; 5-MAR-2014 MJG: Added swid to input redpar structure
 
 loadct, 39, /silent
 !p.color = 0
 !p.background=255
 
 debug = redpar.debug ; verbose operation. See CTIO.PAR
+swid = redpar.swid
 
 if n_params() lt 3 then begin
    print,'syntax: fords,im,swid,orc[,ome].'
@@ -278,7 +280,7 @@ FOR direction = -1, 1, 2 DO BEGIN
 		 endelse
 
 		 edge:                     ;jump here to skip a swath
-		 if debug ge 3 then stop
+		 ;if debug ge 3 then stop
 	  endfor		;end order loop
 
 	  ; AT Oct 7 2011: diagnostic of swath peaks

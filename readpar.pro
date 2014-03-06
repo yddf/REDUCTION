@@ -17,12 +17,11 @@ function readpar, file
     if strpos(line,';') eq -1 then tmps = tmps + ' ' + line $
        else tmps = tmps + ' ' + strmid(line,0,strpos(line,';'))
     if strpos(line,'}') ne -1 then tmps = strcompress(strtrim(tmps,2))	
-  endwhile      
+  endwhile 
   res = execute('par = '+tmps)  ; execute command, create structure
   close, unit 
   free_lun, unit  
   print, 'Parameters are read from ', file
-
   return, par
     
 end

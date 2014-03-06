@@ -9,8 +9,6 @@ sum = 0
 im = getimage(flatfiles[0], redpar, header=header) ; read the first image
 if (size(im))[0] lt 2 then return ; file not found
 
-geom = chip_geometry(flatfiles[0], hdr=header, redpar=redpar) ; returns CCD geometry in a structure 
-;stop
 sz = size(im)
 nc=sz[1]  &  nr=sz[2]
 im_arr1=dblarr(nc,nr,numwf)
@@ -23,7 +21,7 @@ normvalarr = 0d
 ctwf=0   
 fspot = 0 ;index the im array data cube
 for j = 0, numwf-1 do begin
-	im = getimage(flatfiles[j], redpar, header=header, geom=geom) ; read  image, correct for bias and non-linearity        
+	im = getimage(flatfiles[j], redpar, header=header) ; read  image, correct for bias and non-linearity        
 	if redpar.flatnorm eq 1 then begin
 		imswath = im[(sz[2]/2d - swidth):(sz[2]/2d + swidth),*]
 		imswmed = median(imswath, dimen=1, /double)
