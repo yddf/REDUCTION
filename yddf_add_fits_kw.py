@@ -20,7 +20,7 @@ if __name__ == '__main__':
     parser.add_argument('filename',
         help='Name of input FITS file', type=str)
     parser.add_argument('object_name',
-        help='The name of the object to add to the FITS header', type=int)
+        help='The name of the object to add to the FITS header', type=str)
     args = parser.parse_args()
 
     addObjectName(args.filename,args.object_name)
