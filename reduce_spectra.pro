@@ -91,7 +91,7 @@ if ~keyword_set(flatname) and keyword_set(flatset) then begin
    ADDFLAT, flatfnames,sum, redpar, im_arr  
    if (size(sum))[0] lt 2 then stop ; no data!
    mwrfits, sum, flatname
-   stop
+;   stop
    print, 'reduce_spectra: summed flat is written to '+flatname  
 endif 
 
