@@ -38,14 +38,17 @@ mode:  0,                      ; index of the actual mode (*)
 flatnorm:  1,                      
 minflatval: 1d3,       ; minimum acceptable value for flats 
 slicerflat:  1,                      ; set this to 1 to use the narrow slit + shift & width change for order finding
-pkcoefs: [25.515140,20.117281,0.059089911,0.0011122965],  ;yt=2 poly coefs of peak maxima @center y(iord), unbinned pixels
-nords:  86,                    ; number of orders to extract
+;2012 peaks (nords=86):
+;pkcoefs: [25.515140,20.117281,0.059089911,0.0011122965],  ;yt=2 poly coefs of peak maxima @center y(iord), unbinned pixels
+;2014 peaks:
+pkcoefs: [33.438922,20.962224,0.092372792,0.00099172752],  ;yt=2 poly coefs of peak maxima @center y(iord), unbinned pixels
+nords:  65,                    ; number of orders to extract
 modes: ['fiber'],  ; observing modes 
 xwids: [20],             ; extraction width, binned pixels 
 dpks:  [0],             ; peak shift for each mode, binned pixels 
 binnings: ['3x1','3x1','3x1','4x4', '1x1'], ; binning in each mode, row x column
 swid: 32, ;swath width: # of columns in each swath
-debug: 0}                      ; 1 in debug mode, with plots and stops
+debug: 1}                      ; 1 in debug mode, with plots and stops
 
 ;(*): denotes this value is set in yddf_reduce by the options when calling it
 ;DEBUG MODES1
